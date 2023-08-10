@@ -1,7 +1,11 @@
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from ..dataContext.sqlAlchemyContext import db
 
 class Song(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128))
+    minutes = db.Column(db.Integer)
+    seconds = db.Column(db.Integer)
+    interpreter = db.Column(db.String(128))
+
+    def __representation__(self):
+        return "{}-{}-{}-{}".format(self.title, self.minutes, self.minutes, self.seconds, self.interpreter)
