@@ -13,7 +13,7 @@ activate () {
 }
 
 install () {
-    pip install -r requirements.txt
+    pip3 install -r requirements.txt
 }
 
 run () {
@@ -24,4 +24,12 @@ run () {
     else
         flask run -p $1
     fi
+}
+
+docker_up() {
+    docker compose up --build -d
+}
+
+docker_down() {
+    docker compose down
 }
