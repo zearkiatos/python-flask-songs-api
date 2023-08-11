@@ -1,6 +1,6 @@
 from flaskr import create_app
-from .dataContext import db
-from .models import Song, Media, Album, User
+from .dataContext.sqlAlchemyContext import db
+from .models import Media, Album, User, Song
 
 app = create_app('default')
 app_context = app.app_context()
@@ -11,16 +11,21 @@ db.create_all()
 
 #Test
 with app.app_context():
-    song = Song(title='Nothing else Matters', minutes=6,seconds=25, interpreter="Metallica")
-    song2 = Song(title='November Rain 🌧️', minutes=12,seconds=10, interpreter="Guns n' Roses")
-    album = Album(title='Black Album', year=1992, description="Metallica black album", media=Media.CD.name)
     user = User(username='zearkiatos', password='p@$$w0rd')
+    album = Album(title='Black Album', year=1992, description="Metallica black album", media=Media.CD.name)
+    song = Song(title="Nothing else matter", minutes=6, seconds=40, interpreter='Metallica')
+    user.albums.append(album)
+    album.songs.append(song)
+    db.session.add(user)
     db.session.add(song)
     db.session.commit()
-    db.session.add(song2)
-    db.session.commit()
-    db.session.add(album)
-    db.session.commit()
-    db.session.add(user)
-    db.session.commit()
+    print(User.query.all())
+    print(User.query.all()[0].albums)
+    print(Album.query.all()[0].songs)
     print(Song.query.all())
+    print(Album.query.all())
+    db.session.delete(album)
+    print(User.query.all())
+    print(Album.query.all())
+    print(Song.query.all())
+    print(Album.query.all())
