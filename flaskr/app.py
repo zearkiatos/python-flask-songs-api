@@ -12,7 +12,8 @@ db.create_all()
 #Test
 with app.app_context():
     album_schema = AlbumSchema()
-    album = Album(title='Black Album', year=1992, description="Metallica black album", media=Media.CD.name)
+    album = Album(title='Black Album', year=1992, description="Metallica black album", media=Media.CD)
     db.session.add(album)
     db.session.commit()
-    print(album_schema.dumps(album) for album in Album.query.all())
+    print(Album.query.all())
+    # print(album_schema.dumps(album) for album in Album.query.all())

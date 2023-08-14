@@ -1,5 +1,5 @@
-from ..dataContext.sqlAlchemyContext import db
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
+from ..dataContext.sqlAlchemyContext import db
 from ..utils.EnumToDictionary import EnumToDictionary
 
 class Album(db.Model):
@@ -7,7 +7,7 @@ class Album(db.Model):
     title = db.Column(db.String(128))
     year = db.Column(db.Integer)
     description = db.Column(db.String(512))
-    media = db.Column(db.String(20))
+    media = db.Column(db.enum())
     user = db.Column(db.Integer, db.ForeignKey('user.id'))
     songs = db.relationship('Song', secondary='album_song', back_populates='albums')
     __table_args__=(db.UniqueConstraint('user', 'title', name='album_title_unique'),)
@@ -16,7 +16,7 @@ class Album(db.Model):
         return "{}-{}-{}-{}".format(self.title, self.year, self.description, self.media)
     
 class AlbumSchema(SQLAlchemyAutoSchema):
-    media = EnumToDictionary(attribute=('media'))
+    media = EnumToDictionary(attribute=("media"))
     class Meta:
         model = Album
         include_relationships = True

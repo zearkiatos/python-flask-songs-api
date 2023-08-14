@@ -5,7 +5,9 @@ class EnumToDictionary(fields.Field):
         if value is None:
             return None
         
+        print(value)
+        
         return {
-            'key': value.name,
-            'value': value.value
+            "key": value.name,
+            "value": value.value
         }
