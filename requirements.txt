@@ -7,3 +7,4 @@ Jinja2==3.0.1
 MarkupSafe==2.0.1
 SQLAlchemy==1.4.15
 Werkzeug==2.0.1
+mashmalow-sqlalchemy==0.25.0
