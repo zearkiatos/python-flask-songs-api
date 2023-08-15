@@ -1,6 +1,6 @@
 from flaskr import create_app
 from .dataContext.sqlAlchemyContext import db
-from .models import Media, Album, User, Song, AlbumSchema
+from .models import User, UserSchema
 
 app = create_app('default')
 app_context = app.app_context()
@@ -11,9 +11,9 @@ db.create_all()
 
 #Test
 with app.app_context():
-    album_schema = AlbumSchema()
-    album = Album(title='Black Album', year=1992, description="Metallica black album", media=Media.CD)
-    db.session.add(album)
+    user_schema = UserSchema()
+    user = User(username="Zearkiatos", password="P@$$w0rd")
+    db.session.add(user)
     db.session.commit()
-    print(Album.query.all())
-    # print(album_schema.dumps(album) for album in Album.query.all())
+    print(User.query.all())
+    print([user_schema.dumps(user) for user in User.query.all()])
