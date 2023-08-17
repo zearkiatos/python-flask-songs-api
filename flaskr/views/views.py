@@ -25,10 +25,11 @@ class SongsView(Resource):
 class SongView(Resource):
 
     def get(self, song_id):
-        return [song_schema.dump(song) for song in Song.query.get_or_404(song_id)]
+        
+        return song_schema.dump(Song.query.get_or_404(song_id))
 
     def put(self, song_id):
-        song = Song.get_or_404(song_id)
+        song = Song.query.get_or_404(song_id)
         song.title = request.json.get('title', song.title)
         song.minutes = request.json.get('minutes', song.minutes)
         song.seconds = request.json.get('seconds', song.seconds)
@@ -39,7 +40,7 @@ class SongView(Resource):
         return song_schema.dump(song)
 
     def delete(self, song_id):
-        song = Song.get_or_404(song_id)
+        song = Song.query.get_or_404(song_id)
         db.session.delete(song)
         db.session.commit()
 
@@ -63,10 +64,10 @@ class UsersView(Resource):
 class UserView(Resource):
 
     def get(self, user_id):
-        return [user_schema.dump(user) for user in User.query.get_or_404(user_id)]
+        return user_schema.dump(Song.query.get_or_404(user_id))
 
     def put(self, user_id):
-        user = User.get_or_404(user_id)
+        user = User.query.get_or_404(user_id)
         user.username = request.json.get('username', user.username)
         user.password = request.json.get('password', user.password)
 
@@ -75,7 +76,7 @@ class UserView(Resource):
         return user_schema.dump(user)
 
     def delete(self, user_id):
-        user = Song.get_or_404(user_id)
+        user = User.query.get_or_404(user_id)
         db.session.delete(user)
         db.session.commit()
 
@@ -94,15 +95,14 @@ class AlbumsView(Resource):
         db.session.commit()
 
         return album_schema.dump(new_album)
-
-
+    
 class AlbumView(Resource):
 
     def get(self, album_id):
-        return [album_schema.dump(album) for album in Album.query.get_or_404(album_id)]
+        return album_schema.dump(Album.query.get_or_404(album_id))
 
     def put(self, album_id):
-        album = Album.get_or_404(album_id)
+        album = Album.query.get_or_404(album_id)
         album.title = request.json.get('title', album.title)
         album.year = request.json.get('year', album.year)
         album.description = request.json.get('description', album.description)
@@ -113,7 +113,7 @@ class AlbumView(Resource):
         return album_schema.dump(album)
 
     def delete(self, album_id):
-        album = Album.get_or_404(album_id)
+        album = Album.query.get_or_404(album_id)
         db.session.delete(album)
         db.session.commit()
 
