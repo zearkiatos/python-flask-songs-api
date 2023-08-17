@@ -1,6 +1,7 @@
 from flaskr import create_app
+from flask_restful import Api
 from .dataContext.sqlAlchemyContext import db
-from .models import User, UserSchema
+from .views import SongsView, SongView, UsersView, UserView, AlbumsView, AlbumView
 
 app = create_app('default')
 app_context = app.app_context()
@@ -9,11 +10,10 @@ app_context.push()
 db.init_app(app)
 db.create_all()
 
-#Test
-with app.app_context():
-    user_schema = UserSchema()
-    user = User(username="Zearkiatos", password="P@$$w0rd")
-    db.session.add(user)
-    db.session.commit()
-    print(User.query.all())
-    print([user_schema.dumps(user) for user in User.query.all()])
+api = Api(app)
+api.add_resource(SongsView, '/songs')
+api.add_resource(SongView, '/song/<int:song_id>')
+api.add_resource(UsersView, '/users')
+api.add_resource(UserView, '/user/<int:user_id>')
+api.add_resource(AlbumsView, '/albums')
+api.add_resource(AlbumView, '/album/<int:album_id>')
