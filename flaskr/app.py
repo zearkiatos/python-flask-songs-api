@@ -1,7 +1,7 @@
 from flaskr import create_app
 from flask_restful import Api
 from .dataContext.sqlAlchemyContext import db
-from .views import SongsView, SongView, SignInView, LogInView, AlbumsView, AlbumView, UserView
+from .views import SongsView, SongView, SignInView, LogInView, AlbumsView, AlbumView, UserView, AlbumsUserView, SongsAlbumView
 
 app = create_app('default')
 app_context = app.app_context()
@@ -18,3 +18,5 @@ api.add_resource(SignInView, '/signin')
 api.add_resource(UserView, '/user/<int:user_id>')
 api.add_resource(AlbumsView, '/albums')
 api.add_resource(AlbumView, '/album/<int:album_id>')
+api.add_resource(AlbumsUserView, '/user/<int:user_id>/albums')
+api.add_resource(SongsAlbumView, '/album/<int:album_id>/songs')

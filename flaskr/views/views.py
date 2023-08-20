@@ -1,5 +1,6 @@
 from flask_restful import Resource
 from flask import request
+from sqlalchemy.exc import IntegrityError
 from ..dataContext import db
 from ..models import Song, SongSchema, User, UserSchema, Album, AlbumSchema
 
@@ -65,7 +66,8 @@ class SignInView(Resource):
         db.session.add(new_user)
         db.session.commit()
         return "Created user successful", 201
-    
+
+
 class UserView(Resource):
     def put(self, user_id):
         user = User.query.get_or_404(user_id)
@@ -116,3 +118,46 @@ class AlbumView(Resource):
         db.session.commit()
 
         return 'The operation was successful', 204
+
+
+class AlbumsUserView(Resource):
+    def post(self, user_id):
+        new_album = Album(title=request.json['title'], year=request.json['year'],
+                          description=request.json['description'], media=request.json['media'])
+        user = User.query.get_or_404(user_id)
+        user.albums.append(new_album)
+
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            return 'The user has already had with the name', 409
+
+        return album_schema.dump(new_album)
+
+    def get(self, user_id):
+        user = User.query.get_or_404(user_id)
+        return [album_schema.dump(album) for album in user.albums]
+
+
+class SongsAlbumView(Resource):
+    def post(self, album_id):
+        album = Album.query.get_or_404(album_id)
+
+        if "song_id" in request.json.keys():
+            new_song = Song.query.get(request.json["song_id"])
+            if new_song is not None:
+                album.songs.append(new_song)
+                db.session.commit()
+            else:
+                return 'Wrong song', 404
+        else:
+            new_song = Song(title=request.json["title"], minutes=request.json["minutes"],
+                            seconds=request.json["seconds"], interpreter=request.json["interpreter"])
+            album.songs.append(new_song)
+        db.session.commit()
+        return song_schema.dump(new_song)
+
+    def get(self, album_id):
+        album = Album.query.get_or_404(album_id)
+        return [song_schema.dump(song) for song in album.songs]
