@@ -25,7 +25,7 @@ class SongsView(Resource):
 class SongView(Resource):
 
     def get(self, song_id):
-        
+
         return song_schema.dump(Song.query.get_or_404(song_id))
 
     def put(self, song_id):
@@ -47,40 +47,37 @@ class SongView(Resource):
         return 'The operation was successful', 204
 
 
-class UsersView(Resource):
-    def get(self):
-        return [user_schema.dump(user) for user in User.query.all()]
+class LogInView(Resource):
+    def post(self):
+        username = request.json['username']
+        password = request.json['password']
+        user = User.query.filter_by(username=username, password=password).all()
+        if user:
+            return {"message": "Login session successful"}, 200
+        else:
+            return {"message": "User name or password wrong"}, 401
 
+
+class SignInView(Resource):
     def post(self):
         new_user = User(
-            username=request.json['username'], password=request.json['password'])
-
+            username=request.json["username"], password=request.json["password"])
         db.session.add(new_user)
         db.session.commit()
-
-        return user_schema.dump(new_user)
-
-
+        return "Created user successful", 201
+    
 class UserView(Resource):
-
-    def get(self, user_id):
-        return user_schema.dump(Song.query.get_or_404(user_id))
-
     def put(self, user_id):
         user = User.query.get_or_404(user_id)
-        user.username = request.json.get('username', user.username)
-        user.password = request.json.get('password', user.password)
-
+        user.password = request.json.get("password", user.password)
         db.session.commit()
-
         return user_schema.dump(user)
 
     def delete(self, user_id):
         user = User.query.get_or_404(user_id)
         db.session.delete(user)
         db.session.commit()
-
-        return 'The operation was successful', 204
+        return '', 204
 
 
 class AlbumsView(Resource):
@@ -95,7 +92,8 @@ class AlbumsView(Resource):
         db.session.commit()
 
         return album_schema.dump(new_album)
-    
+
+
 class AlbumView(Resource):
 
     def get(self, album_id):
