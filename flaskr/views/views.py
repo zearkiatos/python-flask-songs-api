@@ -1,6 +1,7 @@
 from flask_restful import Resource
 from flask import request
 from sqlalchemy.exc import IntegrityError
+from flask_jwt_extended import jwt_required, create_access_token
 from ..dataContext import db
 from ..models import Song, SongSchema, User, UserSchema, Album, AlbumSchema
 
@@ -10,9 +11,11 @@ album_schema = AlbumSchema()
 
 
 class SongsView(Resource):
+    @jwt_required()
     def get(self):
         return [song_schema.dump(song) for song in Song.query.all()]
-
+    
+    @jwt_required()
     def post(self):
         new_song = Song(title=request.json['title'], minutes=request.json['minutes'],
                         seconds=request.json['seconds'], interpreter=request.json['interpreter'])
@@ -24,11 +27,12 @@ class SongsView(Resource):
 
 
 class SongView(Resource):
-
+    @jwt_required()
     def get(self, song_id):
 
         return song_schema.dump(Song.query.get_or_404(song_id))
-
+    
+    @jwt_required()
     def put(self, song_id):
         song = Song.query.get_or_404(song_id)
         song.title = request.json.get('title', song.title)
@@ -39,7 +43,8 @@ class SongView(Resource):
         db.session.commit()
 
         return song_schema.dump(song)
-
+    
+    @jwt_required()
     def delete(self, song_id):
         song = Song.query.get_or_404(song_id)
         db.session.delete(song)
@@ -54,7 +59,8 @@ class LogInView(Resource):
         password = request.json['password']
         user = User.query.filter_by(username=username, password=password).all()
         if user:
-            return {"message": "Login session successful"}, 200
+            access_token = create_access_token(identity=request.json['username'])
+            return {"message": "Login session successful", "accessToken": access_token}, 200
         else:
             return {"message": "User name or password wrong"}, 401
 
@@ -63,18 +69,24 @@ class SignInView(Resource):
     def post(self):
         new_user = User(
             username=request.json["username"], password=request.json["password"])
+        access_token = create_access_token(identity=request.json['username'])
         db.session.add(new_user)
         db.session.commit()
-        return "Created user successful", 201
+        return {
+            "message": "Created user successful",
+            "accessToken": access_token
+        }, 201
 
 
 class UserView(Resource):
+    @jwt_required()
     def put(self, user_id):
         user = User.query.get_or_404(user_id)
         user.password = request.json.get("password", user.password)
         db.session.commit()
         return user_schema.dump(user)
 
+    @jwt_required()
     def delete(self, user_id):
         user = User.query.get_or_404(user_id)
         db.session.delete(user)
@@ -83,9 +95,11 @@ class UserView(Resource):
 
 
 class AlbumsView(Resource):
+    @jwt_required()
     def get(self):
         return [album_schema.dump(album) for album in Album.query.all()]
 
+    @jwt_required()
     def post(self):
         new_album = Album(
             title=request.json['title'], year=request.json['year'], description=request.json['description'], media=request.json['media'])
@@ -97,10 +111,11 @@ class AlbumsView(Resource):
 
 
 class AlbumView(Resource):
-
+    @jwt_required()
     def get(self, album_id):
         return album_schema.dump(Album.query.get_or_404(album_id))
 
+    @jwt_required()
     def put(self, album_id):
         album = Album.query.get_or_404(album_id)
         album.title = request.json.get('title', album.title)
@@ -111,7 +126,8 @@ class AlbumView(Resource):
         db.session.commit()
 
         return album_schema.dump(album)
-
+    
+    @jwt_required()
     def delete(self, album_id):
         album = Album.query.get_or_404(album_id)
         db.session.delete(album)
@@ -121,6 +137,7 @@ class AlbumView(Resource):
 
 
 class AlbumsUserView(Resource):
+    @jwt_required()
     def post(self, user_id):
         new_album = Album(title=request.json['title'], year=request.json['year'],
                           description=request.json['description'], media=request.json['media'])
@@ -134,13 +151,14 @@ class AlbumsUserView(Resource):
             return 'The user has already had with the name', 409
 
         return album_schema.dump(new_album)
-
+    @jwt_required()
     def get(self, user_id):
         user = User.query.get_or_404(user_id)
         return [album_schema.dump(album) for album in user.albums]
 
 
 class SongsAlbumView(Resource):
+    @jwt_required()
     def post(self, album_id):
         album = Album.query.get_or_404(album_id)
 
@@ -158,6 +176,7 @@ class SongsAlbumView(Resource):
         db.session.commit()
         return song_schema.dump(new_song)
 
+    @jwt_required()
     def get(self, album_id):
         album = Album.query.get_or_404(album_id)
         return [song_schema.dump(song) for song in album.songs]
