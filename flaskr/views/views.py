@@ -1,7 +1,7 @@
 from flask_restful import Resource
 from flask import request
 from sqlalchemy.exc import IntegrityError
-from flask_jwt_extended import jwt_required, create_access_token
+from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 from ..dataContext import db
 from ..models import Song, SongSchema, User, UserSchema, Album, AlbumSchema
 
@@ -59,7 +59,7 @@ class LogInView(Resource):
         password = request.json['password']
         user = User.query.filter_by(username=username, password=password).all()
         if user:
-            access_token = create_access_token(identity=request.json['username'])
+            access_token = create_access_token(identity=user[0].id)
             return {"message": "Login session successful", "accessToken": access_token}, 200
         else:
             return {"message": "User name or password wrong"}, 401
@@ -81,17 +81,41 @@ class SignInView(Resource):
 class UserView(Resource):
     @jwt_required()
     def put(self, user_id):
-        user = User.query.get_or_404(user_id)
-        user.password = request.json.get("password", user.password)
-        db.session.commit()
-        return user_schema.dump(user)
+        try:
+            token_id = get_jwt_identity()
+            user = User.query.get_or_404(user_id)
+            if token_id == user.id:
+                user.password = request.json.get("password", user.password)
+                db.session.commit()
+                return user_schema.dump(user)
+            else:
+                return {
+                    'message': 'The user is unauthorized',
+                }, 401
+
+        except:
+            return {
+                "message": "Something was wrong",
+            }, 500
+
 
     @jwt_required()
     def delete(self, user_id):
-        user = User.query.get_or_404(user_id)
-        db.session.delete(user)
-        db.session.commit()
-        return '', 204
+        try:
+            token_id = get_jwt_identity()
+            user = User.query.get_or_404(user_id)
+            if token_id == user.id:
+                db.session.delete(user)
+                db.session.commit()
+                return '', 204
+            else:
+                return {
+                    'message': 'The user is unauthorized',
+                }, 401
+        except:
+            return {
+                "message": "Something was wrong",
+            }, 500
 
 
 class AlbumsView(Resource):
@@ -139,22 +163,46 @@ class AlbumView(Resource):
 class AlbumsUserView(Resource):
     @jwt_required()
     def post(self, user_id):
-        new_album = Album(title=request.json['title'], year=request.json['year'],
-                          description=request.json['description'], media=request.json['media'])
-        user = User.query.get_or_404(user_id)
-        user.albums.append(new_album)
-
         try:
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            return 'The user has already had with the name', 409
+            token_id = get_jwt_identity()
+            user = User.query.get_or_404(user_id)
+            if token_id == user.id:
+                new_album = Album(title=request.json['title'], year=request.json['year'],
+                                description=request.json['description'], media=request.json['media'])
+                user = User.query.get_or_404(user_id)
+                user.albums.append(new_album)
 
-        return album_schema.dump(new_album)
+                try:
+                    db.session.commit()
+                except IntegrityError:
+                    db.session.rollback()
+                    return 'The user has already had with the name', 409
+
+                return album_schema.dump(new_album)
+            else:
+                return {
+                    'message': 'The user is unauthorized',
+                }, 401
+        except:
+            return {
+                "message": "Something was wrong",
+            }, 500
+
     @jwt_required()
     def get(self, user_id):
-        user = User.query.get_or_404(user_id)
-        return [album_schema.dump(album) for album in user.albums]
+        try:
+            token_id = get_jwt_identity()
+            user = User.query.get_or_404(user_id)
+            if token_id == user.id:
+                return [album_schema.dump(album) for album in user.albums]
+            else:
+                return {
+                    'message': 'The user is unauthorized',
+                }, 401
+        except:
+            return {
+                "message": "Something was wrong",
+            }, 500
 
 
 class SongsAlbumView(Resource):
