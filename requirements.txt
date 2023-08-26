@@ -11,3 +11,4 @@ marshmallow-sqlalchemy==0.25.0
 flask_restful==0.3.9
 flask-jwt-extended==4.2.1
 python-dotenv
+flask-cors==3.0.10

@@ -1,6 +1,7 @@
 from flaskr import create_app
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 from .dataContext.sqlAlchemyContext import db
 from .views import SongsView, SongView, SignInView, LogInView, AlbumsView, AlbumView, UserView, AlbumsUserView, SongsAlbumView
 
@@ -10,6 +11,8 @@ app_context.push()
 
 db.init_app(app)
 db.create_all()
+
+cors = CORS(app)
 
 api = Api(app)
 api.add_resource(SongsView, '/songs')
