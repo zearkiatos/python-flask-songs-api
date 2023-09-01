@@ -17,6 +17,4 @@ RUN make install
 
 EXPOSE 5000
 
-ENTRYPOINT [ "python" ]
-
-RUN make run
+ENTRYPOINT ["sh", "./docker/entrypoint.sh"]

@@ -1,5 +1,5 @@
 from flask import Flask
-from .config import Config
+from config import Config
 
 def create_app(config_name):
     config = Config()
@@ -9,3 +9,5 @@ def create_app(config_name):
     app.config['JWT_SECRET_KEY'] = config.SECRET_KEY
     app.config['PROPAGATE_EXCEPTIONS']=True
     return app
+
+from . import *

@@ -2,8 +2,19 @@ from flask_restful import Resource
 from flask import request
 from sqlalchemy.exc import IntegrityError
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
+from datetime import datetime
 from ..dataContext import db
 from ..models import Song, SongSchema, User, UserSchema, Album, AlbumSchema
+from celery import Celery
+from config import Config
+
+config = Config()
+
+celery_app = Celery(__name__, broker=f"{config.REDIS_BROKER_BASE_URL}/0")
+
+@celery_app.task(name='log_register')
+def log_register(*args):
+    pass
 
 song_schema = SongSchema()
 user_schema = UserSchema()
@@ -59,6 +70,8 @@ class LogInView(Resource):
         password = request.json['password']
         user = User.query.filter_by(username=username, password=password).all()
         if user:
+            args = (username, datetime.utcnow())
+            log_register.apply_async(args=args, queue="logs")
             access_token = create_access_token(identity=user[0].id)
             return {"message": "Login session successful", "accessToken": access_token}, 200
         else:
