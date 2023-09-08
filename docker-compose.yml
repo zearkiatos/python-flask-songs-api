@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  broker:
+    build:
+      context: .
+      dockerfile: redis.Dockerfile
+    container_name: redis-songs-broker
+    ports:
+      - "6380:6379"
+    volumes:
+      - ./data/redis/:/data
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: python-flask-songs-api
+    volumes:
+      - ".:/app"
+    ports:
+      - "5001:5000"
+    env_file:
+      - .env.dev
+    tty: true
+    depends_on:
+      - broker
+    links:
+      - broker
+

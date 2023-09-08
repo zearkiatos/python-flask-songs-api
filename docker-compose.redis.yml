@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  broker:
+    build:
+      context: .
+      dockerfile: redis.Dockerfile
+    container_name: redis-songs-broker
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis/:/data
